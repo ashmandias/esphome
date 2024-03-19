@@ -1,9 +1,9 @@
 substitutions:
-    devicename: fluval-proxy-breeder
-    devicemac: 44:A6:E5:70:00:34
-    address: 192.168.2.27
-    ble_client_id: breeder_client
-    fluval_ble_led_id: breeder
+    devicename: fluval-proxy-charlies
+    devicemac: 44:A6:E5:68:C1:42
+    address: 192.168.2.16
+    ble_client_id: charlies_client
+    fluval_ble_led_id: charlies
 
 esphome:
   name: $devicename
@@ -12,16 +12,17 @@ esphome:
     version: "1.0"
 
 esp32:
-    board: esp32doit-devkit-v1
+  #  board: esp32doit-devkit-v1
   #framework:
   #  type: arduino
-  # board: esp32dev
+  board: esp32dev
   framework:
     type: esp-idf
     version: recommended
 
 # Enable logging
 logger:
+  level: debug
 
 # Enable Home Assistant API
 api:
@@ -32,7 +33,7 @@ ota:
   password: "aaaaaaaa"
 
 wifi:
-  ssid: !secret ssid
+  ssid: !secret wifi_ssid
   password: !secret wifi_password
   use_address: $address
   fast_connect: true
@@ -48,6 +49,8 @@ wifi:
     #captive_portal:
 
 esp32_ble_tracker:
+  scan_parameters:
+    active: false
 
 ble_client:
   - mac_address: $devicemac
@@ -89,6 +92,10 @@ switch:
   - platform: fluval_ble_led
     fluval_ble_led_id: $fluval_ble_led_id
     name: "light"
+  - platform: ble_client
+    ble_client_id: $ble_client_id
+    name: "Toggle $fluval_ble_led_id"
+
 
 text_sensor:
   - platform: fluval_ble_led
@@ -100,47 +107,48 @@ sensor:
     fluval_ble_led_id: $fluval_ble_led_id
     channel: 1
     zero_if_off: true
-    name: "Green"
+    name: "Ch1: Rose"
 
   - platform: fluval_ble_led
     fluval_ble_led_id: $fluval_ble_led_id
     channel: 2
     zero_if_off: true
-    name: "Cold white"
+    name: "Ch2: Green"
 
   - platform: fluval_ble_led
     fluval_ble_led_id: $fluval_ble_led_id
     channel: 3
     zero_if_off: true
-    name: "Blue"
+    name: "Ch3: Blue"
 
   - platform: fluval_ble_led
     fluval_ble_led_id: $fluval_ble_led_id
     channel: 4
     zero_if_off: true
-    name: "Rose"
+    name: "Ch4: White"
 
 number:
 - platform: fluval_ble_led
   fluval_ble_led_id: $fluval_ble_led_id
-  name: "Green"
+  name: "Ch1: Rose"
   channel: 1
   zero_if_off: true
 
 - platform: fluval_ble_led
   fluval_ble_led_id: $fluval_ble_led_id
-  name: "Cold White"
+  name: "Ch2: Green"
   channel: 2
   zero_if_off: true
 
 - platform: fluval_ble_led
   fluval_ble_led_id: $fluval_ble_led_id
-  name: "Blue"
+  name: "Ch3: Blue"
   channel: 3
   zero_if_off: true
 
 - platform: fluval_ble_led
   fluval_ble_led_id: $fluval_ble_led_id
-  name: "Rose"
+  name: "Ch4: White"
   channel: 4
   zero_if_off: true
+
