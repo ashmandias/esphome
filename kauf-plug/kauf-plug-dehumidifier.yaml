@@ -7,7 +7,7 @@ esphome:
   name: ${name}
   name_add_mac_suffix: false
 dashboard_import:
-  package_import_url: 
+  package_import_url: github://ashmandias/esphome/kauf-plug/${name}.yaml@main
 api:
   encryption:
     key: !secret api_encryption_key
