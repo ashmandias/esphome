@@ -1,0 +1,5 @@
+venv
+privatekey
+publickey
+secrets.yaml
+.esphome
