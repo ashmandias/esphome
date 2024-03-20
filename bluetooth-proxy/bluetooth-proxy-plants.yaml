@@ -1,5 +1,5 @@
 substitutions:
-  name: esp32-bluetooth-proxy-cfb590
+  name: bluetooth-proxy-plants
   friendly_name: Bluetooth Proxy (Plants)
 
 packages:
@@ -12,6 +12,9 @@ esphome:
   project:
     name: esphome.bluetooth-proxy
     version: "1.0"
+
+dashboard_import:
+  package_import_url: github://ashmandias/esphome/bluetooth-proxy/${name}.yaml@main      
 
 api:
   encryption:
