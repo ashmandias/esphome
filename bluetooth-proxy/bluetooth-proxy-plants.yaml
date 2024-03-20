@@ -14,7 +14,7 @@ esphome:
     version: "1.0"
 
 dashboard_import:
-  package_import_url: github://ashmandias/esphome/bluetooth-proxy/${name}.yaml@main      
+  package_import_url: github://ashmandias/esphome/bluetooth-proxy/${name}.yaml@main
 
 api:
   encryption:

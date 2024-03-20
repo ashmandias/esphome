@@ -13,6 +13,9 @@ esphome:
     name: esphome.bluetooth-proxy
     version: "1.0"
 
+dashboard_import:
+  package_import_url: github://ashmandias/esphome/bluetooth-proxy/${name}.yaml@main
+
 api:
   encryption:
     key: !secret api_encryption_key
@@ -24,6 +27,7 @@ esp32:
   board: esp32dev
   framework:
     type: esp-idf
+                                                                                           
 
 esp32_ble_tracker:
   scan_parameters:
