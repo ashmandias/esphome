@@ -1,7 +1,7 @@
 substitutions:
     devicename: fluval-proxy-breeder
     devicemac: 44:A6:E5:70:00:34
-    address: 192.168.2.27
+#    address: 192.168.2.27
     ble_client_id: breeder_client
     fluval_ble_led_id: breeder
 
@@ -30,12 +30,13 @@ api:
     key: !secret api_encryption_key
 
 ota:
-  password: "aaaaaaaa"
+    platform: esphome
+    password: "aaaaaaaa"
 
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-  use_address: $address
+#  use_address: $address
   fast_connect: true
 
   # Enable fallback hotspot (captive portal) in case wifi connection fails
@@ -101,6 +102,8 @@ text_sensor:
   - platform: fluval_ble_led
     fluval_ble_led_id: $fluval_ble_led_id
     name: "mode"
+  - platform: version
+    name: ESPHome Version
 
 sensor:
   - platform: fluval_ble_led
@@ -127,6 +130,22 @@ sensor:
     zero_if_off: true
     name: "Ch4: White"
 
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+      
+
 number:
 - platform: fluval_ble_led
   fluval_ble_led_id: $fluval_ble_led_id
@@ -151,4 +170,6 @@ number:
   name: "Ch4: White"
   channel: 4
   zero_if_off: true
+
+
 

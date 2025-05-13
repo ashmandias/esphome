@@ -1,6 +1,6 @@
 substitutions:
-  name: bluetooth-proxy-dining_room
-  friendly_name: Bluetooth Proxy (Dining Room)
+  name: bluetooth-proxy-storeroom
+  friendly_name: Bluetooth Proxy (Storeroom)
 
 packages:
   esphome.bluetooth-proxy: github://esphome/firmware/bluetooth-proxy/esp32-generic.yaml@main
@@ -21,6 +21,7 @@ api:
     key: !secret api_encryption_key
 logger:
 ota:
+    - platform: esphome
 improv_serial:
 
 esp32:
@@ -63,6 +64,8 @@ sensor:
     entity_category: "diagnostic"
     device_class: ""
     
+
+
 text_sensor:
   - platform: version
     name: ESPHome Version

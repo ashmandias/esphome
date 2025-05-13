@@ -1,9 +1,9 @@
 substitutions:
-    devicename: fluval-proxy-charlies
-    devicemac: 44:A6:E5:68:C1:42
-    address: 192.168.2.16
-    ble_client_id: charlies_client
-    fluval_ble_led_id: charlies
+    devicename: fluval-proxy-breeder
+    devicemac: 44:A6:E5:70:00:34
+    address: 192.168.2.27
+    ble_client_id: breeder_client
+    fluval_ble_led_id: breeder
 
 esphome:
   name: $devicename
@@ -63,7 +63,6 @@ time:
 bluetooth_proxy:
   active: true
 
-
 external_components:
   - source: github://mrzottel/esphome@fluval_ble_led
     components: [ fluval_ble_led ]
@@ -104,8 +103,6 @@ text_sensor:
   - platform: fluval_ble_led
     fluval_ble_led_id: $fluval_ble_led_id
     name: "mode"
-  - platform: version
-    name: ESPHome Version
 
 sensor:
   - platform: fluval_ble_led
@@ -156,6 +153,4 @@ number:
   name: "Ch4: White"
   channel: 4
   zero_if_off: true
-
-
 

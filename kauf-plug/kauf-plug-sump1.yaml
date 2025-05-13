@@ -1,18 +1,15 @@
 substitutions:
-  name: kauf-plug-dehumidifier
-  friendly_name: Dehumidifier Plug
+  name: kauf-plug-sump1
+  friendly_name: Sump Plug 1
 packages:
   Kauf.PLF12: github://KaufHA/PLF12/kauf-plf12.yaml
 esphome:
   name: ${name}
   name_add_mac_suffix: false
-  friendly_name: ${friendly_name}
-  project:
-    name: esphome.kauf-plug
-    version: "1.0"
-dashboard_import:
-  package_import_url: github://ashmandias/esphome/kauf-plug/${name}.yaml@main
 api:
+  #  encryption:
+  #  #key: 2QReAcuKy138dxKeeykPTfb+Yqux2W5jOX8q7zryCGU=
+  #  key: !secret api_encryption_key
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
@@ -31,6 +28,7 @@ sensor:
     unit_of_measurement: "Signal %"
     entity_category: "diagnostic"
     device_class: ""
+
 
 text_sensor:
   - platform: version

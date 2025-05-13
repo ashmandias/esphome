@@ -1,0 +1,29 @@
+
+module my-glances 1.0;
+
+require {
+	type init_t;
+	type hddtemp_port_t;
+	type http_port_t;
+	type gconf_home_t;
+	type unreserved_port_t;
+	type abrt_t;
+	class file { execute execute_no_trans };
+	class tcp_socket name_connect;
+	class unix_stream_socket connectto;
+}
+
+#============= init_t ==============
+allow init_t abrt_t:unix_stream_socket connectto;
+
+#!!!! This avc is allowed in the current policy
+allow init_t gconf_home_t:file { execute execute_no_trans };
+
+#!!!! This avc is allowed in the current policy
+allow init_t hddtemp_port_t:tcp_socket name_connect;
+
+#!!!! This avc is allowed in the current policy
+allow init_t http_port_t:tcp_socket name_connect;
+
+#!!!! This avc can be allowed using the boolean 'nis_enabled'
+allow init_t unreserved_port_t:tcp_socket name_connect;

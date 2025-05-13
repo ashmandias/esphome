@@ -1,0 +1,221 @@
+substitutions:
+  device_name:  switchbot-plug-1
+  device_description: Energy Monitoring Smart Plug (W1901400)
+  friendly_name: SwitchBot Plug Mini
+
+esphome:
+  name: ${device_name}
+  comment: ${device_description}
+  platformio_options:
+    board_build.flash_mode: dio
+
+esp32:
+  board: esp32-c3-devkitm-1
+  variant: ESP32C3
+  framework:
+    type: esp-idf
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot in case wifi connection fails
+  ap:
+    ssid: "Switchbot-Plug-1"
+    password: "pS90LetQoL5k"
+
+# Enable time component for use by daily power sensor
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+binary_sensor:
+  # Reports when the button is pressed
+  - platform: gpio
+    device_class: power
+    pin:
+      number: GPIO02
+      inverted: True
+    name: ${friendly_name} Button
+    on_press:
+      - switch.toggle: relay
+
+  # Reports if this device is Connected or not
+  - platform: status
+    name: ${friendly_name} Status
+
+sensor:
+  # Reports how long the device has been powered (in minutes)
+  - platform: uptime
+    name: ${friendly_name} Uptime
+    filters:
+      - lambda: return x / 60.0;
+    unit_of_measurement: minutes
+
+  # Reports the WiFi signal strength
+  - platform: wifi_signal
+    name: ${friendly_name} Wifi Signal
+    update_interval: 60s
+
+  # Reports the Current, Voltage, and Power used by the plugged-in device (not counting this plug's own usage of about 0.8W/0.019A, so subtract those when calibrating with this plugged into a Kill-A-Watt type meter)
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO020
+      inverted: True
+    cf_pin: GPIO018
+    cf1_pin: GPIO019
+    current_resistor: 0.001 #The value of the shunt resistor for current measurement. Defaults to the Sonoff POW’s value 0.001 ohm.
+    # voltage_divider: 2401 # Commented out, using default
+    power:
+      name: ${friendly_name} Power
+      unit_of_measurement: W
+      id: wattage
+    current:
+      name: ${friendly_name} Current
+      unit_of_measurement: A
+    voltage:
+      name: ${friendly_name} Voltage
+      unit_of_measurement: V
+    change_mode_every: 1 #Skips first reading after each change, so this will double the update interval. Default 8
+    update_interval: 10s #10s setting => 20 second effective update rate for Power, 40 second for Current and Voltage. Default 60s
+
+  # Reports the total Power so-far each day, resets at midnight, see https://esphome.io/components/sensor/total_daily_energy.html
+  - platform: total_daily_energy
+    name: ${friendly_name} Total Daily Energy
+    power_id: wattage
+    filters:
+      - multiply: 0.001 ## convert Wh to kWh
+    unit_of_measurement: kWh
+
+text_sensor:
+  # Reports the ESPHome Version with compile date
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+switch:
+  - platform: gpio
+    name: ${friendly_name}
+    pin: GPIO06
+    id: relay
+    restore_mode: RESTORE_DEFAULT_OFF #Try to restore relay state after reboot/power-loss event.
+    #RESTORE_DEFAULT_OFF (Default) - Attempt to restore state and default to OFF if not possible to restore. Uses flash write cycles.
+    #RESTORE_DEFAULT_ON - Attempt to restore state and default to ON. Uses flash write cycles.
+    #ALWAYS_OFF - Always initialize the pin as OFF on bootup. Does not use flash write cycles.
+    #ALWAYS_ON - Always initialize the pin as ON on bootup. Does not use flash write cycles.
+    on_turn_on:
+      - light.turn_on:
+          id: blue_led
+          brightness: 100%
+    on_turn_off:
+      - light.turn_off: blue_led
+
+output:
+  - platform: ledc
+    id: white_output
+    pin: GPIO07
+    frequency: 19531Hz
+  - platform: ledc
+    id: blue_output
+    pin: GPIO08
+    frequency: 19531Hz
+light:
+  - platform: monochromatic
+    name: ${friendly_name} White LED
+    output: white_output
+    id: white_led
+    restore_mode: ALWAYS_OFF #Start with light off after reboot/power-loss event.
+    #RESTORE_DEFAULT_OFF (Default) - Attempt to restore state and default to OFF if not possible to restore. Uses flash write cycles.
+    #RESTORE_DEFAULT_ON - Attempt to restore state and default to ON. Uses flash write cycles.
+    #ALWAYS_OFF - Always initialize the pin as OFF on bootup. Does not use flash write cycles.
+    #ALWAYS_ON - Always initialize the pin as ON on bootup. Does not use flash write cycles.
+    effects:
+      - strobe:
+      - flicker:
+          alpha: 50% #The percentage that the last color value should affect the light. More or less the “forget-factor” of an exponential moving average. Defaults to 95%.
+          intensity: 50% #The intensity of the flickering, basically the maximum amplitude of the random offsets. Defaults to 1.5%.
+      - lambda:
+          name: Throb
+          update_interval: 1s
+          lambda: |-
+            static int state = 0;
+            auto call = id(white_led).turn_on();
+            // Transtion of 1000ms = 1s
+            call.set_transition_length(1000);
+            if (state == 0) {
+              call.set_brightness(1.0);
+            } else {
+              call.set_brightness(0.01);
+            }
+            call.perform();
+            state += 1;
+            if (state == 2)
+              state = 0;
+  - platform: monochromatic
+    name: ${friendly_name} Blue LED
+    output: blue_output
+    id: blue_led
+    restore_mode: ALWAYS_OFF #Start with light off after reboot/power-loss event.
+    #RESTORE_DEFAULT_OFF (Default) - Attempt to restore state and default to OFF if not possible to restore. Uses flash write cycles.
+    #RESTORE_DEFAULT_ON - Attempt to restore state and default to ON. Uses flash write cycles.
+    #ALWAYS_OFF - Always initialize the pin as OFF on bootup. Does not use flash write cycles.
+    #ALWAYS_ON - Always initialize the pin as ON on bootup. Does not use flash write cycles.
+    effects:
+      - strobe:
+      - flicker:
+          alpha: 50% #The percentage that the last color value should affect the light. More or less the “forget-factor” of an exponential moving average. Defaults to 95%.
+          intensity: 50% #The intensity of the flickering, basically the maximum amplitude of the random offsets. Defaults to 1.5%.
+      - lambda:
+          name: Throb
+          update_interval: 1s
+          lambda: |-
+            static int state = 0;
+            auto call = id(blue_led).turn_on();
+            // Transtion of 1000ms = 1s
+            call.set_transition_length(1000);
+            if (state == 0) {
+              call.set_brightness(1.0);
+            } else {
+              call.set_brightness(0.01);
+            }
+            call.perform();
+            state += 1;
+            if (state == 2)
+              state = 0;
+
+# Blink the red light if we aren't connected to WiFi. Could use https://esphome.io/components/status_led.html instead but then we couldn't use the red light for other things as well.
+interval:
+  - interval: 500ms
+    then:
+      - if:
+          condition:
+            not:
+              wifi.connected:
+          then:
+            - light.turn_on:
+                id: white_led
+                brightness: 100%
+                transition_length: 0s
+            - delay: 250ms
+            - light.turn_off:
+                id: white_led
+                transition_length: 250ms
+
+esp32_ble_tracker:
+  scan_parameters:
+    # We currently use the defaults to ensure Bluetooth
+    # can co-exist with WiFi In the future we may be able to
+    # enable the built-in coexistence logic in ESP-IDF
+    active: true
+                  
+bluetooth_proxy:
+  active: true

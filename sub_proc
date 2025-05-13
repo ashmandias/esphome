@@ -1,0 +1,18 @@
+#!/bin/bash
+
+DEVICE="${1}"
+LOG_FILE_BASE="${2}"
+
+DEVICE_NAME_SHORT="$(basename "${DEVICE}")"
+LOG_FILE="${LOG_FILE_BASE}.${DEVICE_NAME_SHORT}"
+
+echo Starting $DEVICE $LOG_FILE ad $(date)  >> ${LOG_FILE}
+
+echo "running: esphome clean ${DEVICE}" >> ${LOG_FILE}
+esphome clean ${DEVICE} >> ${LOG_FILE}
+echo "running: esphome compile ${DEVICE}" >> ${LOG_FILE}
+esphome compile ${DEVICE} >> ${LOG_FILE}
+echo "running: esphome upload ${DEVICE}" >> ${LOG_FILE}
+esphome upload ${DEVICE} >> ${LOG_FILE}
+
+echo Ending $DEVICE $LOG_FILE ad $(date)  >> ${LOG_FILE}

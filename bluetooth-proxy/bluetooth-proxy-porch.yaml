@@ -1,5 +1,5 @@
 substitutions:
-  name: esp32-bluetooth-proxy-porch
+  name: bluetooth-proxy-porch
   friendly_name: Bluetooth Proxy (Porch)
 
 packages:
@@ -13,14 +13,12 @@ esphome:
     name: esphome.bluetooth-proxy
     version: "1.0"
 
-dashboard_import:
-  package_import_url: github://ashmandias/esphome/bluetooth-proxy/${name}.yaml@main
-
 api:
   encryption:
     key: !secret api_encryption_key
 logger:
 ota:
+    - platform: esphome
 improv_serial:
 
 esp32:
@@ -45,5 +43,40 @@ button:
     entity_category: diagnostic
 
 wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
+  networks:
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+    - ssid: !secret wifi_ssid2
+      password: !secret wifi_password2
+    - ssid: !secret wifi_ssid3
+      password: !secret wifi_password3
+    - ssid: !secret wifi_ssid4
+      password: !secret wifi_password4
+    #  use_address: 192.168.2.17
+
+text_sensor:
+  - platform: wifi_info
+    ssid: 
+      name: ESP Connected SSID
+    scan_results:
+      name: ESP Latest Scan Results
+  - platform: version
+    name: ESPHome Version
+
+sensor:
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    update_interval: 60s
+    entity_category: "diagnostic"
+
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+
+
